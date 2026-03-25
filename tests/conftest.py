@@ -9,7 +9,7 @@ from src.app import app
 
 
 # Initial activities data derived from the app's current initial state
-INITIAL_ACTIVITIES = deepcopy(app.activities)
+INITIAL_ACTIVITIES = deepcopy(src.app.activities)
 @pytest.fixture
 def app_client():
     """
