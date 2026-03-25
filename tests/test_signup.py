@@ -158,28 +158,26 @@ class TestPostSignup:
 
     # Edge case tests
     def test_signup_first_to_empty_activity(self, mock_app):
-        """Test signup when activity has no participants initially."""
-        # Find an activity with no participants
+        """Test signup when activity has no participants."""
+        # Art Studio has only one participant; remove them to create an empty activity
+        activity = "Art Studio"
+        existing_participant = "ava@mergington.edu"
+        mock_app.delete(f"/activities/{activity}/signup?email={existing_participant}")
+
+        # Verify activity is now empty
         response = mock_app.get("/activities")
         activities = response.json()
-        
-        empty_activity = None
-        for name, details in activities.items():
-            if not details["participants"]:
-                empty_activity = name
-                break
+        assert len(activities[activity]["participants"]) == 0
 
-        # Ensure this test never becomes a no-op: fail if no empty activity exists
-        assert empty_activity is not None, "Test requires at least one activity with no participants"
-
+        # Sign up the first participant
         email = "firstuser@school.edu"
-        response = mock_app.post(f"/activities/{empty_activity}/signup?email={email}")
+        response = mock_app.post(f"/activities/{activity}/signup?email={email}")
         assert response.status_code == 200
-        
+
         response = mock_app.get("/activities")
         activities = response.json()
-        assert email in activities[empty_activity]["participants"]
-        assert len(activities[empty_activity]["participants"]) == 1
+        assert email in activities[activity]["participants"]
+        assert len(activities[activity]["participants"]) == 1
 
     def test_signup_existing_initial_participant(self, mock_app):
         """Test that initial participants from app.py are present."""
