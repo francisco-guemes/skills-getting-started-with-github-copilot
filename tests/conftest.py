@@ -6,10 +6,11 @@ import pytest
 from copy import deepcopy
 from fastapi.testclient import TestClient
 from src.app import app
+from src.app import activities as initial_activities
 
 
 # Initial activities data derived from the app's current initial state
-INITIAL_ACTIVITIES = deepcopy(src.app.activities)
+INITIAL_ACTIVITIES = deepcopy(initial_activities)
 @pytest.fixture
 def app_client():
     """
