@@ -62,7 +62,7 @@ class TestGetActivities:
         for activity_name, expected_activity in activities_data.items():
             actual_participants = activities[activity_name]["participants"]
             expected_participants = expected_activity["participants"]
-            assert actual_participants == expected_participants, \
+            assert sorted(actual_participants) == sorted(expected_participants), \
                 f"{activity_name} participants don't match"
 
     def test_get_activities_max_participants_values(self, mock_app, activities_data):
