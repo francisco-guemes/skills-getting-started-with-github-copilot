@@ -4,13 +4,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
   const toastNotification = document.getElementById("toast-notification");
+  let toastHideTimeoutId;
 
   // Function to show toast notification
   function showToast(message, type = "success") {
+    if (toastHideTimeoutId) {
+      clearTimeout(toastHideTimeoutId);
+    }
     toastNotification.textContent = message;
     toastNotification.className = `toast ${type}`;
     toastNotification.classList.remove("hidden");
-    setTimeout(() => toastNotification.classList.add("hidden"), 5000);
+    toastHideTimeoutId = setTimeout(() => toastNotification.classList.add("hidden"), 5000);
   }
 
   // Function to fetch activities from API
@@ -30,23 +34,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
-        const participantsHTML = details.participants.length > 0
-          ? `<ul class="participants-list">${details.participants.map(p =>
-              `<li><span class="participant-email">${p}</span><button class="delete-btn" data-activity="${name}" data-email="${p}" title="Unregister">✕</button></li>`
-            ).join('')}</ul>`
-          : `<p class="no-participants">No participants yet. Be the first!</p>`;
+        // Build activity card content safely using DOM APIs to avoid HTML injection
+        // Title
+        const titleEl = document.createElement("h4");
+        titleEl.textContent = name;
+        activityCard.appendChild(titleEl);
 
-        activityCard.innerHTML = `
-          <h4>${name}</h4>
-          <p>${details.description}</p>
-          <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          <div class="participants-section">
-            <p class="participants-title">Participants (${details.participants.length}/${details.max_participants}):</p>
-            ${participantsHTML}
-          </div>
-        `;
+        // Description
+        const descEl = document.createElement("p");
+        descEl.textContent = details.description;
+        activityCard.appendChild(descEl);
 
+        // Schedule
+        const scheduleEl = document.createElement("p");
+        const scheduleStrong = document.createElement("strong");
+        scheduleStrong.textContent = "Schedule:";
+        scheduleEl.appendChild(scheduleStrong);
+        scheduleEl.appendChild(document.createTextNode(" " + details.schedule));
+        activityCard.appendChild(scheduleEl);
+
+        // Availability
+        const availabilityEl = document.createElement("p");
+        const availabilityStrong = document.createElement("strong");
+        availabilityStrong.textContent = "Availability:";
+        availabilityEl.appendChild(availabilityStrong);
+        availabilityEl.appendChild(document.createTextNode(" " + spotsLeft + " spots left"));
+        activityCard.appendChild(availabilityEl);
+
+        // Participants section
+        const participantsSection = document.createElement("div");
+        participantsSection.className = "participants-section";
+
+        const participantsTitle = document.createElement("p");
+        participantsTitle.className = "participants-title";
+        participantsTitle.textContent = `Participants (${details.participants.length}/${details.max_participants}):`;
+        participantsSection.appendChild(participantsTitle);
+
+        if (details.participants.length > 0) {
+          const participantsList = document.createElement("ul");
+          participantsList.className = "participants-list";
+
+          details.participants.forEach(p => {
+            const li = document.createElement("li");
+
+            const emailSpan = document.createElement("span");
+            emailSpan.className = "participant-email";
+            emailSpan.textContent = p;
+            li.appendChild(emailSpan);
+
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "delete-btn";
+            deleteBtn.dataset.activity = name;
+            deleteBtn.dataset.email = p;
+            deleteBtn.title = "Unregister";
+            deleteBtn.textContent = "✕";
+            li.appendChild(deleteBtn);
+
+            participantsList.appendChild(li);
+          });
+
+          participantsSection.appendChild(participantsList);
+        } else {
+          const noParticipants = document.createElement("p");
+          noParticipants.className = "no-participants";
+          noParticipants.textContent = "No participants yet. Be the first!";
+          participantsSection.appendChild(noParticipants);
+        }
+
+        activityCard.appendChild(participantsSection);
         // Add delete button listeners
         activityCard.querySelectorAll(".delete-btn").forEach(btn => {
           btn.addEventListener("click", async (e) => {

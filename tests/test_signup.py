@@ -168,16 +168,18 @@ class TestPostSignup:
             if not details["participants"]:
                 empty_activity = name
                 break
+
+        # Ensure this test never becomes a no-op: fail if no empty activity exists
+        assert empty_activity is not None, "Test requires at least one activity with no participants"
+
+        email = "firstuser@school.edu"
+        response = mock_app.post(f"/activities/{empty_activity}/signup?email={email}")
+        assert response.status_code == 200
         
-        if empty_activity:
-            email = "firstuser@school.edu"
-            response = mock_app.post(f"/activities/{empty_activity}/signup?email={email}")
-            assert response.status_code == 200
-            
-            response = mock_app.get("/activities")
-            activities = response.json()
-            assert email in activities[empty_activity]["participants"]
-            assert len(activities[empty_activity]["participants"]) == 1
+        response = mock_app.get("/activities")
+        activities = response.json()
+        assert email in activities[empty_activity]["participants"]
+        assert len(activities[empty_activity]["participants"]) == 1
 
     def test_signup_existing_initial_participant(self, mock_app):
         """Test that initial participants from app.py are present."""
@@ -193,4 +195,4 @@ class TestPostSignup:
         response = mock_app.post(
             "/activities/Soccer Club/signup?email=tester@school.edu"
         )
-        assert response.headers["content-type"] == "application/json"
+        assert response.headers.get("content-type", "").startswith("application/json")
