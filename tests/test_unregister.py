@@ -133,11 +133,10 @@ class TestDeleteUnregister:
 
     def test_unregister_does_not_affect_other_activity(self, mock_app):
         """Test that unregistering from one activity doesn't affect others."""
-        email = "lucas@mergington.edu"  # In Soccer Club
-        activity_to_leave = "Soccer Club"
-        activity_to_stay = "Soccer Club"  # Same activity for this test
+        email = "lucas@mergington.edu"  # Initially in Soccer Club
+        activity_to_leave = "Soccer Club"  # Activity to unregister from
         
-        # Signup to Drama Club
+        # Sign up to another activity (Drama Club) that should be unaffected
         mock_app.post("/activities/Drama Club/signup?email=lucas@mergington.edu")
         
         # Unregister from Soccer Club
@@ -213,4 +212,4 @@ class TestDeleteUnregister:
         response = mock_app.delete(
             "/activities/Chess Club/signup?email=michael@mergington.edu"
         )
-        assert response.headers["content-type"] == "application/json"
+        assert response.headers.get("content-type", "").startswith("application/json")

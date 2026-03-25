@@ -87,6 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
             deleteBtn.dataset.activity = name;
             deleteBtn.dataset.email = p;
             deleteBtn.title = "Unregister";
+            deleteBtn.setAttribute("aria-label", `Unregister ${p} from ${name}`);
             deleteBtn.textContent = "✕";
             li.appendChild(deleteBtn);
 
@@ -122,6 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
               fetchActivities();
             } catch (error) {
               console.error("Error unregistering:", error);
+              showToast("Failed to unregister. Please check your connection and try again.", "error");
             }
           });
         });
